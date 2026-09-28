@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="单级与三级高速 TIA 仿真数据库的在线筛选与查询页面。">
+  <title>High-Speed TIA Database</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23061018'/%3E%3Cpath d='M8 36h11l5-17 8 31 7-25 6 11h11' fill='none' stroke='%2338e6c3' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="./assets/styles.css">
+  <script src="./assets/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="High-Speed TIA Database 首页">
+      <span class="brand-mark" aria-hidden="true"><span></span></span>
+      <span><strong>High-Speed TIA Database</strong><small>GitHub 数据查询</small></span>
+    </a>
+    <a class="repo-link" href="https://github.com/pangtou-814/AI-assist-High-Speed-TIA-Database" target="_blank" rel="noreferrer">查看仓库</a>
+  </header>
+
+  <main>
+    <section class="query-panel" aria-labelledby="page-title">
+      <div class="panel-heading">
+        <div>
+          <p class="eyebrow">SPECTRE DATA EXPLORER</p>
+          <h1 id="page-title">TIA 仿真数据库</h1>
+        </div>
+        <p class="dataset-note" id="dataset-note">单级有效数据 · 8,475 条</p>
+      </div>
+
+      <fieldset class="model-switch" aria-label="选择数据库">
+        <legend>选择数据库</legend>
+        <label><input type="radio" name="model" value="one" checked><span>单级 TIA <small>8,475</small></span></label>
+        <label><input type="radio" name="model" value="three"><span>三级 TIA <small>19,652</small></span></label>
+      </fieldset>
+
+      <form id="filters" class="filters" autocomplete="off">
+        <label class="search-field"><span>样本 ID</span><input id="text-query" type="search" placeholder="输入完整或部分 ID"></label>
+        <label><span>VDD</span><select id="vdd"><option value="">全部</option></select></label>
+        <label class="three-only" hidden><span>Cload</span><select id="cload"><option value="">全部</option></select></label>
+        <label class="three-only" hidden><span>Cpd</span><select id="cpd"><option value="">全部</option></select></label>
+        <label><span>最小闭环增益 (dBΩ)</span><input id="gain-min" type="number" step="0.1" placeholder="不限"></label>
+        <label><span>最小闭环带宽 (GHz)</span><input id="bw-min" type="number" step="0.1" min="0" placeholder="不限"></label>
+        <label><span>最大功耗 (mW)</span><input id="power-max" type="number" step="0.1" min="0" placeholder="不限"></label>
+        <label><span id="noise-label">最大噪声 (pA/√Hz)</span><input id="noise-max" type="number" step="0.1" min="0" placeholder="不限"></label>
+        <label><span>最小相位裕度 (°)</span><input id="pm-min" type="number" step="0.1" placeholder="不限"></label>
+        <label><span>排序</span><select id="sort-by">
+          <option value="gain-desc">闭环增益：高到低</option>
+          <option value="bw-desc">闭环带宽：高到低</option>
+          <option value="power-asc">功耗：低到高</option>
+          <option value="noise-asc">噪声：低到高</option>
+          <option value="pm-desc">相位裕度：高到低</option>
+          <option value="vdd-asc">VDD：低到高</option>
+        </select></label>
+        <label class="core-toggle three-only" hidden><input id="core-only" type="checkbox" checked><span>仅 Core 15,360 条</span></label>
+        <button id="reset" type="button" class="secondary-button">清除条件</button>
+      </form>
+    </section>
+
+    <section class="results-panel" aria-labelledby="results-title">
+      <div class="results-heading">
+        <div>
+          <p class="eyebrow">QUERY RESULT</p>
+          <h2 id="results-title"><span id="match-count">—</span> 条匹配</h2>
+        </div>
+        <div class="result-actions">
+          <span id="load-status" class="status loading" role="status">正在读取数据库</span>
+          <a id="download-source" class="secondary-button" href="./data/TIA_one_stage/tia_database_valid.csv" download>下载完整 CSV</a>
+        </div>
+      </div>
+
+      <div id="error-state" class="message error" hidden>
+        <strong>数据库读取失败</strong>
+        <span>请刷新页面；若从本机文件打开，请改用 GitHub Pages 地址。</span>
+      </div>
+
+      <div class="table-wrap" aria-live="polite">
+        <table>
+          <thead><tr id="table-head"></tr></thead>
+          <tbody id="table-body"></tbody>
+        </table>
+      </div>
+
+      <div class="pagination">
+        <p id="page-info">—</p>
+        <div><button id="prev-page" type="button" class="secondary-button">上一页</button><button id="next-page" type="button" class="secondary-button">下一页</button></div>
+      </div>
+    </section>
+
+    <section class="data-notes" aria-labelledby="notes-title">
+      <div><p class="eyebrow">DATA NOTES</p><h2 id="notes-title">数据说明</h2></div>
+      <div class="notes-grid">
+        <article><strong>RF 是几何长度</strong><p>RF 范围 2–8 µm，步长 0.05 µm，不是欧姆阻值。</p></article>
+        <article><strong>单位统一换算</strong><p>页面显示 GHz、mW、pA。单级噪声为 pA/√Hz，三级沿用 Noise_rms_A 口径显示 pA。</p></article>
+        <article><strong>三级 Core</strong><p>Core 是 15,360 条均衡训练子集。关闭开关可查全部 19,652 条有效数据。</p></article>
+        <article><strong>只读页面</strong><p>筛选在当前设备浏览器内完成。数据由 GitHub 静态托管，不写回数据库。</p></article>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="record-dialog">
+    <button id="dialog-close" class="dialog-close" type="button" aria-label="关闭详情">×</button>
+    <p class="eyebrow">SAMPLE DETAIL</p>
+    <h2 id="dialog-title">样本详情</h2>
+    <div id="dialog-content" class="detail-grid"></div>
+  </dialog>
+</body>
+</html>

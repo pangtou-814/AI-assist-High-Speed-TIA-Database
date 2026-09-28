@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "published_at": "2026-09-28",
+  "scope": "final queryable datasets; raw Spectre run artifacts excluded",
+  "datasets": [
+    {
+      "id": "TIA_one_stage",
+      "file": "TIA_one_stage/tia_database_valid.csv",
+      "rows": 8475,
+      "sha256": "baff843d4d099e7739dfc077da790ebb7d98d58e796fdfe8fecfbac0c3f13972"
+    },
+    {
+      "id": "TIA_three_stage_all_valid",
+      "file": "TIA_three_stage/final_dataset_all_valid.csv",
+      "rows": 19652,
+      "sha256": "7d9166a84bad9438d277e90971f3c71d8f500c293784316606b11eb4eb6a71d9"
+    },
+    {
+      "id": "TIA_three_stage_core",
+      "file": "TIA_three_stage/final_dataset_core_15360.csv",
+      "rows": 15360,
+      "sha256": "aeb4fbf6d040f7d68db4b45bde0f5ff11d2a57bb5c455fc3d61e5fdc48de12d1"
+    }
+  ]
+}
